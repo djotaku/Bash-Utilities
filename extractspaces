@@ -1,0 +1,11 @@
+#!/bin/bash
+
+for x in *\ *;
+
+do 
+
+y=$(echo "$x"| sed y/\ \/_/)
+
+mv "$x" "$y" 
+
+done

@@ -1,0 +1,43 @@
+#!/bin/bash
+# ogg2lame
+# Original version written by someone Michael A. Peters
+
+# uncompress all ogg files so that we can normalize them
+for file in `ls |grep "\.ogg$"`; do
+    ogg --decode $file
+done
+
+# normalize
+#normalize -b *.wav
+
+for file in `ls |grep "\.ogg$"`; do
+    STUMP="`echo $file |sed s?"\.ogg$"?""?`"
+    TRACKNUMBER="`metaogg --list $file |grep \"TRACKNUMBER=\" |cut -d"=" -f2`"
+    TITLE="`metaogg --list $file |grep \"TITLE=\" |cut -d"=" -f2`"
+    ARTIST="`metaogg --list $file |grep \"ARTIST=\" |cut -d"=" -f2`"
+    ALBUM="`metaogg --list $file |grep \"ALBUM=\" |cut -d"=" -f2`"
+    DATE="`metaogg --list $file |grep \"DATE=\" |cut -d"=" -f2`"
+    GENRE="`metaogg --list $file |grep \"GENRE=\" |cut -d"=" -f2`"
+    COMMENT="${file}: transcoded on `date +%F`, lame `lame --version |head -1 |cut -d\" \" -f3`"
+
+    if [ "$GENRE" = "Inspirational" ]; then
+	GENRE="Gospel"
+    fi
+#    ogg --decode $file
+    lame --preset standard --add-id3v2 \
+	--tn "${TRACKNUMBER}" \
+	--tt "${TITLE}" \
+	--ta "${ARTIST}" \
+	--tl "${ALBUM}" \
+	--ty "${DATE}" \
+	--tg "${GENRE}" \
+	--tc "${COMMENT}"  "${STUMP}.wav" "${STUMP}.mp3"
+    if [ $? -eq 0 ]; then
+	rm -f "${STUMP}.wav"
+    else
+	echo "Transcode of $file encountered a problem"
+    fi
+done
+
+exit 0
+

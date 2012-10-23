@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Convert all flac files to ogg files at 256 kbps!"
+
+oggenc *.flac -b 256
+
+echo "Done!"

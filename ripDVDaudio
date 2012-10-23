@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Written by Eric Mesa
+# requires transcode packages
+# Version 0.1 - created the script
+
+#ask the user a series of questions to fill in the fields below:
+
+echo "filename of file to rip from?"
+read ripfile
+
+echo "What title do you want for the file?"
+read title
+
+echo "What artist do you want?"
+read artist
+
+echo "What year do you want?"
+read year
+
+echo "Comment?"
+read comment
+
+echo "Genre?"
+read genre
+
+echo "filename?"
+read filename
+
+mplayer -dumpaudio $ripfile
+
+a52dec -o wav stream.dump | lame  -b 128 --tt $title --ta $artist --ty $year --tc $comment --tg $genre - $filename.mp3
+
+echo "done"

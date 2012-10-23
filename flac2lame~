@@ -1,0 +1,43 @@
+#!/bin/bash
+# flac2lame
+# written by someone else
+
+# uncompress all flac files so that we can normalize them
+for file in `ls |grep "\.flac$"`; do
+    flac --decode $file
+done
+
+# normalize
+normalize -b *.wav
+
+for file in `ls |grep "\.flac$"`; do
+    STUMP="`echo $file |sed s?"\.flac$"?""?`"
+    TRACKNUMBER="`metaflac --list $file |grep \"TRACKNUMBER=\" |cut -d"=" -f2`"
+    TITLE="`metaflac --list $file |grep \"TITLE=\" |cut -d"=" -f2`"
+    ARTIST="`metaflac --list $file |grep \"ARTIST=\" |cut -d"=" -f2`"
+    ALBUM="`metaflac --list $file |grep \"ALBUM=\" |cut -d"=" -f2`"
+    DATE="`metaflac --list $file |grep \"DATE=\" |cut -d"=" -f2`"
+    GENRE="`metaflac --list $file |grep \"GENRE=\" |cut -d"=" -f2`"
+    COMMENT="${file}: transcoded on `date +%F`, lame `lame --version |head -1 |cut -d\" \" -f3`"
+
+    if [ "$GENRE" = "Inspirational" ]; then
+	GENRE="Gospel"
+    fi
+#    flac --decode $file
+    lame --preset standard --add-id3v2 \
+	--tn "${TRACKNUMBER}" \
+	--tt "${TITLE}" \
+	--ta "${ARTIST}" \
+	--tl "${ALBUM}" \
+	--ty "${DATE}" \
+	--tg "${GENRE}" \
+	--tc "${COMMENT}"  "${STUMP}.wav" "${STUMP}.mp3"
+    if [ $? -eq 0 ]; then
+	rm -f "${STUMP}.wav"
+    else
+	echo "Transcode of $file encountered a problem"
+    fi
+done
+
+exit 0
+
